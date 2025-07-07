@@ -8,36 +8,13 @@ st.set_page_config(
     layout="centered",
 )
 
-# --- Custom CSS for Styling ---
-# We'll inject some CSS to make our prediction cards look nicer.
-# st.markdown("""
-# <style>
-#     /* Style for the prediction cards */
-#     .prediction-card {
-#         border: 1px solid #e1e1e1;
-#         border-radius: 10px;
-#         padding: 20px;
-#         margin-bottom: 20px;
-#         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-#         transition: box-shadow 0.3s ease-in-out;
-#     }
-#     .prediction-card:hover {
-#         box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-#     }
-#     /* Style for the label text */
-#     .label-true { color: #28a745; font-weight: bold; }
-#     .label-false { color: #dc3545; font-weight: bold; }
-#     .label-either { color: #007bff; font-weight: bold; }
-# </style>
-# """, unsafe_allow_html=True)
-
 
 # --- Load Data (with caching) ---
 @st.cache_data
 def load_data():
     try:
-        pairs_df = pd.read_csv('./db/sentence_pairs.csv')
-        preds_df = pd.read_csv('./db/predictions.csv')
+        pairs_df = pd.read_csv('db/sentence_pairs.csv')
+        preds_df = pd.read_csv('db/predictions.csv')
         # Pre-calculate counts for the dashboard
         human_count = preds_df[preds_df['participant_type'] == 'human'].shape[0]
         model_count = preds_df[preds_df['participant_type'] != 'human'].shape[0]
