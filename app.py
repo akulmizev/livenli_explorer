@@ -36,8 +36,8 @@ st.set_page_config(
 @st.cache_data
 def load_data():
     try:
-        pairs_df = pd.read_csv('sentence_pairs.csv')
-        preds_df = pd.read_csv('predictions.csv')
+        pairs_df = pd.read_csv('./db/sentence_pairs.csv')
+        preds_df = pd.read_csv('./db/predictions.csv')
         # Pre-calculate counts for the dashboard
         human_count = preds_df[preds_df['participant_type'] == 'human'].shape[0]
         model_count = preds_df[preds_df['participant_type'] != 'human'].shape[0]
