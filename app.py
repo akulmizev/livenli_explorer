@@ -19,7 +19,7 @@ def load_data():
     try:
         pairs_df = pd.read_csv('db/sentence_pairs.csv')
         preds_df = pd.read_csv('db/predictions.csv')
-        preds_df.loc[preds_df['participant_type'] == 'human', 'participant'] = 'human'
+        # preds_df.loc[preds_df['participant_type'] == 'human', 'participant'] = 'human'
 
         human_count = preds_df[preds_df['participant_type'] == 'human'].shape[0]
         model_count = preds_df[preds_df['participant_type'] != 'human'].shape[0]
@@ -37,6 +37,7 @@ if pairs_df is None:
 
 all_experiments = sorted(preds_df['experiment'].unique())
 all_participants = sorted(preds_df['participant'].unique())
+all_trials = sorted(preds_df['trial'].unique())
 
 with st.sidebar:
     st.title(" NLI Explorer")
@@ -45,6 +46,16 @@ with st.sidebar:
     mode = st.radio(
         "Select a view mode:",
         ('Single Pair View', 'All Explanations View')
+    )
+
+    st.markdown("---")
+    st.header("Global Filters")
+
+    # Add trial selection here
+    selected_trials = st.multiselect(
+        "Select trial(s):",
+        options=all_trials,
+        default=all_trials
     )
 
     st.markdown("---")
@@ -120,12 +131,15 @@ st.title("📊 NLI Dashboard & Data Explorer")
 st.markdown("Explore sentence pairs and compare predictions from different sources.")
 st.markdown("---")
 
+# Filter preds_df based on global trial selection
+preds_df_filtered = preds_df[preds_df['trial'].isin(selected_trials)]
+
 # --- SINGLE PAIR VIEW MODE ---
 if mode == 'Single Pair View':
     st.subheader("Dataset at a Glance")
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Sentence Pairs", f"{len(pairs_df):,}")
-    col2.metric("Total Predictions", f"{len(preds_df):,}")
+    col2.metric("Total Predictions", f"{len(preds_df_filtered):,}")
     col3.metric("🤖 Model Predictions", f"{model_count:,}")
     col4.metric("🧠 Human Predictions", f"{human_count:,}")
     st.markdown("---")
@@ -139,10 +153,10 @@ if mode == 'Single Pair View':
             st.markdown("---")
             st.markdown(f"**Hypothesis:** {pair_info['hypothesis']}")
 
-        relevant_preds = preds_df[
-            (preds_df['sent_id'] == selected_id) &
-            (preds_df['experiment'].isin(selected_experiments)) &
-            (preds_df['participant'].isin(selected_participants))
+        relevant_preds = preds_df_filtered[
+            (preds_df_filtered['sent_id'] == selected_id) &
+            (preds_df_filtered['experiment'].isin(selected_experiments)) &
+            (preds_df_filtered['participant'].isin(selected_participants))
             ].copy()
 
         relevant_preds['wrapped_explanation'] = relevant_preds['explanation'].apply(
@@ -232,7 +246,7 @@ else:  # mode == 'All Explanations View'
     st.info("This view shows all explanations from the selected participant, ordered by sentence pair ID.")
     st.markdown("---")
 
-    all_explanations = preds_df[preds_df['participant'] == participant_to_view].copy()
+    all_explanations = preds_df_filtered[preds_df_filtered['participant'] == participant_to_view].copy()
 
     if not all_explanations.empty:
         # Sort by sentence ID to ensure a consistent order
